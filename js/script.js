@@ -213,6 +213,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     // In case of error, allow submit (fail open) but log
                     console.error('Form protection error:', err);
                 }
+
+                // Clear form after successful submission (Web3Forms will handle the post)
+                // We delay slightly to allow the form to submit, then reset it
+                setTimeout(() => {
+                    form.reset();
+                    // Also reset the Turnstile widget if present
+                    if (window.turnstile && form.querySelector('.cf-turnstile')) {
+                        window.turnstile.reset(form.querySelector('.cf-turnstile'));
+                    }
+                }, 500);
             });
         });
     })();
