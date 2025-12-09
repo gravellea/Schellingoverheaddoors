@@ -198,14 +198,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     jsEnabled.value = '1';
 
-                    // If a Turnstile widget exists in the form, require its token
-                    const hasTurnstile = !!form.querySelector('.cf-turnstile');
-                    if (hasTurnstile) {
-                        const tokenField = form.querySelector('textarea[name="cf-turnstile-response"], input[name="cf-turnstile-response"]');
-                        const tokenVal = tokenField ? (tokenField.value || '').trim() : '';
-                        if (!tokenVal) {
+                    // If a hCaptcha widget exists in the form, require its token
+                    const hasHCaptcha = !!form.querySelector('.h-captcha');
+                    if (hasHCaptcha) {
+                        // hCaptcha creates a response token when completed
+                        // Check if the captcha has been verified (hcaptcha API sets a response in hidden input or we check the widget state)
+                        const hcaptchaResponse = document.querySelector('textarea[name="h-captcha-response"], input[name="h-captcha-response"]');
+                        const captchaVal = hcaptchaResponse ? (hcaptchaResponse.value || '').trim() : '';
+                        
+                        // Alternative: check if hcaptcha API shows a response (if hcaptcha global is available)
+                        let hasCaptchaToken = false;
+                        if (captchaVal) {
+                            hasCaptchaToken = true;
+                        } else if (window.hcaptcha) {
+                            // Get the response from the hCaptcha widget
+                            const hcaptchaContainer = form.querySelector('.h-captcha');
+                            if (hcaptchaContainer && hcaptchaContainer.id) {
+                                const response = window.hcaptcha.getResponse(hcaptchaContainer.id);
+                                hasCaptchaToken = response && response.length > 0;
+                            }
+                        }
+                        
+                        if (!hasCaptchaToken) {
                             e.preventDefault();
-                            alert('Please complete the CAPTCHA before submitting.');
+                            alert('Please complete the hCaptcha before submitting.');
                             return false;
                         }
                     }
@@ -218,9 +234,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 // We delay slightly to allow the form to submit, then reset it
                 setTimeout(() => {
                     form.reset();
-                    // Also reset the Turnstile widget if present
-                    if (window.turnstile && form.querySelector('.cf-turnstile')) {
-                        window.turnstile.reset(form.querySelector('.cf-turnstile'));
+                    // Also reset the hCaptcha widget if present
+                    if (window.hcaptcha) {
+                        const hcaptchaContainer = form.querySelector('.h-captcha');
+                        if (hcaptchaContainer && hcaptchaContainer.id) {
+                            window.hcaptcha.reset(hcaptchaContainer.id);
+                        }
                     }
                 }, 500);
             });
