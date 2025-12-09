@@ -717,6 +717,9 @@ img{
         padding: 40px 0;
     }
 
+    /* Make hero heading smaller on narrow screens */
+    .hero { font-size: 1.4rem; }
+
     .showcase .grid {
         display: block;
         gap: 20px;
@@ -766,7 +769,7 @@ display: flex;
 align-items: center;
 justify-content: center;
 color: white;
-font-size: 2.5rem;
+font-size: 1.8rem;
 font-weight: bold;
 text-shadow: 2px 2px 5px rgba(0,0,0,0.6);
 }
